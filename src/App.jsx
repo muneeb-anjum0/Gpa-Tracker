@@ -83,10 +83,11 @@ const GRADE_RANGES = {
 }
 
 const CHART_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#0f766e', '#f97316', '#64748b', '#db2777', '#111827']
+const GRADE_BAR_COLORS = ['#4f46e5', '#7c3aed', '#db2777', '#f97316', '#f59e0b', '#10b981', '#0ea5e9', '#64748b', '#ef4444', '#111827']
 const EMPTY_SEMESTERS = []
 const SESSION_STARTED_AT_KEY = 'gpa-track-session-started-at'
 const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
-const CHART_MARGIN = { top: 8, right: 8, bottom: 0, left: -18 }
+const CHART_MARGIN = { top: 6, right: 0, bottom: 0, left: -28 }
 
 function getPoints(grade) {
   return GRADE_SCHEME[grade] ?? 0
@@ -272,7 +273,6 @@ function App() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isMomentumHovered, setIsMomentumHovered] = useState(false)
   const [isGradeHovered, setIsGradeHovered] = useState(false)
-  const [isCreditHovered, setIsCreditHovered] = useState(false)
   const fileInputRef = useRef(null)
   const userHandle = user?.email?.split('@')[0] || 'user'
 
@@ -384,10 +384,6 @@ function App() {
           .reduce((sum, course) => sum + getCredits(course), 0)
       ), 0).toFixed(2)),
     })).filter((item) => item.credits > 0)
-    const creditShareData = semesterData.map((item) => ({
-      name: item.shortName,
-      value: item.credits,
-    })).filter((item) => item.value > 0)
     const quality = semesterData.map((item) => ({
       subject: item.shortName,
       SGPA: item.SGPA,
@@ -404,7 +400,7 @@ function App() {
       credits: getCredits(course),
     }))).sort((a, b) => b.impact - a.impact).slice(0, 6)
 
-    return { cgpa, totalCredits, totalCourses, semesterData, cgpaData, distribution, gradeCreditData, creditShareData, quality, best, attention, trend, weightedCourses }
+    return { cgpa, totalCredits, totalCourses, semesterData, cgpaData, distribution, gradeCreditData, quality, best, attention, trend, weightedCourses }
   }, [semesters])
 
   const displaySemesters = useMemo(
@@ -669,7 +665,11 @@ function App() {
                     <XAxis dataKey="grade" tickLine={false} axisLine={false} />
                     <YAxis tickLine={false} axisLine={false} />
                     <Tooltip content={<TrackerTooltip />} />
-                    <Bar dataKey="credits" fill="#8b5cf6" radius={[10, 10, 2, 2]} animationDuration={260} />
+                    <Bar dataKey="credits" radius={[16, 16, 6, 6]} background={{ fill: 'rgba(148, 163, 184, 0.12)', radius: 16 }} animationDuration={260} maxBarSize={42}>
+                      {stats.gradeCreditData.map((entry, index) => (
+                        <Cell key={entry.grade} fill={GRADE_BAR_COLORS[index % GRADE_BAR_COLORS.length]} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 ) : (
                   <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
@@ -684,31 +684,15 @@ function App() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard
-              title={isCreditHovered ? 'Credit share' : 'Credit load'}
-              className="credit-card"
-              onMouseEnter={() => setIsCreditHovered(true)}
-              onMouseLeave={() => setIsCreditHovered(false)}
-            >
+            <ChartCard title="Credit load" className="credit-card">
               <ResponsiveContainer width="100%" height="100%">
-                {isCreditHovered ? (
-                  <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
-                    <Pie data={stats.creditShareData} dataKey="value" nameKey="name" innerRadius={52} outerRadius={92} paddingAngle={3}>
-                      {stats.creditShareData.map((entry, index) => (
-                        <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<TrackerTooltip />} />
-                  </PieChart>
-                ) : (
-                  <BarChart data={stats.semesterData} margin={CHART_MARGIN}>
-                    <CartesianGrid strokeDasharray="5 5" stroke="#dbe3ef" />
-                    <XAxis dataKey="shortName" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
-                    <Tooltip content={<TrackerTooltip />} />
-                    <Bar dataKey="credits" fill="#16a34a" radius={[10, 10, 2, 2]} animationDuration={260} />
-                  </BarChart>
-                )}
+                <BarChart data={stats.semesterData} margin={CHART_MARGIN}>
+                  <CartesianGrid strokeDasharray="5 5" stroke="#dbe3ef" />
+                  <XAxis dataKey="shortName" tickLine={false} axisLine={false} />
+                  <YAxis tickLine={false} axisLine={false} />
+                  <Tooltip content={<TrackerTooltip />} />
+                  <Bar dataKey="credits" fill="#16a34a" radius={[16, 16, 6, 6]} background={{ fill: 'rgba(22, 163, 74, 0.10)', radius: 16 }} animationDuration={260} maxBarSize={42} />
+                </BarChart>
               </ResponsiveContainer>
             </ChartCard>
 
