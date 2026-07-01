@@ -38,8 +38,10 @@ import {
   UserPlus,
 } from 'lucide-react'
 import {
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
@@ -82,6 +84,8 @@ const GRADE_RANGES = {
 
 const CHART_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#0f766e', '#f97316', '#64748b', '#db2777', '#111827']
 const EMPTY_SEMESTERS = []
+const SESSION_STARTED_AT_KEY = 'gpa-track-session-started-at'
+const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
 function getPoints(grade) {
   return GRADE_SCHEME[grade] ?? 0
@@ -122,6 +126,19 @@ function normalizeSemesters(value) {
   return Array.isArray(value) ? value : EMPTY_SEMESTERS
 }
 
+function startSessionWindow() {
+  localStorage.setItem(SESSION_STARTED_AT_KEY, Date.now().toString())
+}
+
+function clearSessionWindow() {
+  localStorage.removeItem(SESSION_STARTED_AT_KEY)
+}
+
+function isSessionExpired() {
+  const sessionStartedAt = Number(localStorage.getItem(SESSION_STARTED_AT_KEY))
+  return !Number.isFinite(sessionStartedAt) || Date.now() - sessionStartedAt > SESSION_MAX_AGE_MS
+}
+
 function AuthScreen({ authError, setAuthError }) {
   const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
@@ -139,11 +156,13 @@ function AuthScreen({ authError, setAuthError }) {
 
     setIsSubmitting(true)
     try {
+      await setPersistence(auth, browserLocalPersistence)
       if (mode === 'login') {
         await signInWithEmailAndPassword(auth, email, password)
       } else {
         await createUserWithEmailAndPassword(auth, email, password)
       }
+      startSessionWindow()
     } catch (error) {
       setAuthError(error.message.replace('Firebase: ', ''))
     } finally {
@@ -253,8 +272,20 @@ function App() {
       return undefined
     }
 
-    return onAuthStateChanged(auth, (nextUser) => {
+    return onAuthStateChanged(auth, async (nextUser) => {
+      if (nextUser && isSessionExpired()) {
+        await signOut(auth)
+        clearSessionWindow()
+        setUser(null)
+        setAuthError('Your 30-day session expired. Please sign in again.')
+        setAuthLoading(false)
+        return
+      }
+
       setUser(nextUser)
+      if (!nextUser) {
+        clearSessionWindow()
+      }
       setAuthLoading(false)
     })
   }, [])
