@@ -691,7 +691,7 @@ function App() {
                   <XAxis dataKey="shortName" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} />
                   <Tooltip content={<TrackerTooltip />} />
-                  <Bar dataKey="credits" fill="#16a34a" radius={[16, 16, 6, 6]} background={{ fill: 'rgba(22, 163, 74, 0.10)', radius: 16 }} animationDuration={260} maxBarSize={42} />
+                  <Bar dataKey="credits" fill="#a3e635" radius={[16, 16, 6, 6]} background={{ fill: 'rgba(163, 230, 53, 0.16)', radius: 16 }} animationDuration={260} maxBarSize={42} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
