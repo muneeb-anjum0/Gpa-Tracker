@@ -1,0 +1,284 @@
+[
+  {
+    "id": 1000001,
+    "name": "Semester 1",
+    "courses": [
+      {
+        "id": 1000001,
+        "name": "CSC 1101 Calculus and Analytical Geometry",
+        "creditHours": 3,
+        "grade": "C"
+      },
+      {
+        "id": 1000002,
+        "name": "CSC 1103 Fundamentals of Programming",
+        "creditHours": 3,
+        "grade": "A+"
+      },
+      {
+        "id": 1000003,
+        "name": "CSCL 1103 Lab: Fundamentals of Programming",
+        "creditHours": 1,
+        "grade": "A+"
+      },
+      {
+        "id": 1000004,
+        "name": "CSC 1102 English Composition and Comprehension",
+        "creditHours": 3,
+        "grade": "A"
+      },
+      {
+        "id": 1000005,
+        "name": "CSC 1108 Introduction to Computer Science",
+        "creditHours": 2,
+        "grade": "A"
+      },
+      {
+        "id": 1000006,
+        "name": "CSCL 1108 Lab: Introduction to Computer Science",
+        "creditHours": 1,
+        "grade": "A+"
+      },
+      {
+        "id": 1000007,
+        "name": "CSC 1107 Applied Physics",
+        "creditHours": 2,
+        "grade": "C"
+      },
+      {
+        "id": 1000008,
+        "name": "CSCL 1107 Lab: Applied Physics",
+        "creditHours": 1,
+        "grade": "A-"
+      },
+      {
+        "id": 1000009,
+        "name": "CSC 1109 Pakistan Studies",
+        "creditHours": 2,
+        "grade": "B+"
+      }
+    ]
+  },
+  {
+    "id": 1000002,
+    "name": "Semester 2",
+    "courses": [
+      {
+        "id": 1000010,
+        "name": "CSC 1201 Discrete Mathematical Structures",
+        "creditHours": 3,
+        "grade": "B"
+      },
+      {
+        "id": 1000011,
+        "name": "CSC 2101 Communication and Presentation Skills",
+        "creditHours": 3,
+        "grade": "A"
+      },
+      {
+        "id": 1000012,
+        "name": "CSC 1208 Object Oriented Programming Techniques",
+        "creditHours": 3,
+        "grade": "B-"
+      },
+      {
+        "id": 1000013,
+        "name": "CSCL 1208 Lab: Object Oriented Programming Techniques",
+        "creditHours": 1,
+        "grade": "B+"
+      },
+      {
+        "id": 1000014,
+        "name": "CSC 1209 Islamic Studies / Humanities",
+        "creditHours": 2,
+        "grade": "A+"
+      },
+      {
+        "id": 1000015,
+        "name": "SEC 3308 Management Principles",
+        "creditHours": 3,
+        "grade": "C+"
+      }
+    ]
+  },
+  {
+    "id": 1000003,
+    "name": "Semester 3",
+    "courses": [
+      {
+        "id": 1000016,
+        "name": "CSC 2102 Data Structures and Algorithms",
+        "creditHours": 3,
+        "grade": "B"
+      },
+      {
+        "id": 1000017,
+        "name": "CSCL 2102 Lab: Data Structures and Algorithms",
+        "creditHours": 1,
+        "grade": "B-"
+      },
+      {
+        "id": 1000018,
+        "name": "SEC 3302 Financial Accounting",
+        "creditHours": 3,
+        "grade": "A-"
+      },
+      {
+        "id": 1000019,
+        "name": "CSC 2206 Linear Algebra",
+        "creditHours": 3,
+        "grade": "B-"
+      },
+      {
+        "id": 1000020,
+        "name": "CSC 3109 Software Engineering",
+        "creditHours": 3,
+        "grade": "B-"
+      }
+    ]
+  },
+  {
+    "id": 1000004,
+    "name": "Semester 4",
+    "courses": [
+      {
+        "id": 1000021,
+        "name": "CSC 2203 Database Systems",
+        "creditHours": 3,
+        "grade": "B-"
+      },
+      {
+        "id": 1000022,
+        "name": "CSC 2205 Operating Systems",
+        "creditHours": 3,
+        "grade": "C-"
+      },
+      {
+        "id": 1000023,
+        "name": "CSCL 2203 Lab: Database Systems",
+        "creditHours": 1,
+        "grade": "A-"
+      },
+      {
+        "id": 1000024,
+        "name": "CSCL 2205 Lab: Operating Systems",
+        "creditHours": 1,
+        "grade": "B"
+      },
+      {
+        "id": 1000025,
+        "name": "SEC 3303 Human Resource Management",
+        "creditHours": 3,
+        "grade": "A-"
+      },
+      {
+        "id": 1000026,
+        "name": "CSC 1206 Probability and Statistics",
+        "creditHours": 3,
+        "grade": "B+"
+      },
+      {
+        "id": 1000027,
+        "name": "SEC 2403 Software Requirement Engineering",
+        "creditHours": 3,
+        "grade": "B"
+      }
+    ]
+  },
+  {
+    "id": 1000005,
+    "name": "Semester 5",
+    "courses": [
+      {
+        "id": 1000028,
+        "name": "CSC 1205 Technical and Business Writing",
+        "creditHours": 3,
+        "grade": "A+"
+      },
+      {
+        "id": 1000029,
+        "name": "SEC 4713 Digital Logic Design",
+        "creditHours": 3,
+        "grade": "B+"
+      },
+      {
+        "id": 1000030,
+        "name": "CSC 3205 Computer Networks and Data Communications",
+        "creditHours": 3,
+        "grade": "C"
+      },
+      {
+        "id": 1000031,
+        "name": "CSCL 3205 Lab: Computer Networks and Data Communications",
+        "creditHours": 1,
+        "grade": "B"
+      },
+      {
+        "id": 1000032,
+        "name": "SEC 2404 Software Design and Architecture",
+        "creditHours": 2,
+        "grade": "C"
+      },
+      {
+        "id": 1000033,
+        "name": "SECL 2404 Lab: Software Design and Architecture",
+        "creditHours": 1,
+        "grade": "A-"
+      },
+      {
+        "id": 1000034,
+        "name": "SEC 4714 Business Process Engineering",
+        "creditHours": 3,
+        "grade": "A-"
+      }
+    ]
+  },
+  {
+    "id": 1777205119488,
+    "name": "Semester 6",
+    "courses": [
+      {
+        "id": 1777205120901,
+        "name": "Professional Practices",
+        "creditHours": 3,
+        "grade": "C"
+      },
+      {
+        "id": 1777205131318,
+        "name": "Artificial Intelligence",
+        "creditHours": 3,
+        "grade": "C-"
+      },
+      {
+        "id": 1777205135605,
+        "name": "Formal Methods in Software Engineering",
+        "creditHours": 3,
+        "grade": "B+"
+      },
+      {
+        "id": 1777205140215,
+        "name": "Software Construction and Development",
+        "creditHours": 3,
+        "grade": "F"
+      },
+      {
+        "id": 1777205144840,
+        "name": "Web Engineering",
+        "creditHours": 3,
+        "grade": "B"
+      },
+      {
+        "id": 1777205152853,
+        "name": "Information Security",
+        "creditHours": 3,
+        "grade": "B"
+      },
+      {
+        "id": 1777205164397,
+        "name": "Lab: Software Construction and Development",
+        "creditHours": "1",
+        "grade": "A+"
+      }
+    ]
+  }
+]
