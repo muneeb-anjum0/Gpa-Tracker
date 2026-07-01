@@ -245,6 +245,7 @@ function App() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isMomentumHovered, setIsMomentumHovered] = useState(false)
   const fileInputRef = useRef(null)
+  const userHandle = user?.email?.split('@')[0] || 'user'
 
   useEffect(() => {
     if (!firebaseReady) {
@@ -520,26 +521,20 @@ function App() {
 
   return (
     <main className="app-shell">
-      <AnimatePresence>
-        {statusMessage && (
-          <Motion.div className="toast" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-            <Sparkles size={16} />
-            {statusMessage}
-          </Motion.div>
-        )}
-      </AnimatePresence>
-
       <Motion.header className="minimal-header" initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}>
         <div className="brand-mark">
-          <div className="brand-icon">
-            <GraduationCap size={23} />
-          </div>
-          <div>
-            <p>GPA Tracker</p>
-            <span>{user.email}</span>
-          </div>
+          <p>GPA-Track</p>
+          <span className="user-tag">{userHandle}</span>
         </div>
         <div className="header-meta">
+          <AnimatePresence>
+            {statusMessage && (
+              <Motion.div className="toast" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }}>
+                <Sparkles size={14} />
+                {statusMessage}
+              </Motion.div>
+            )}
+          </AnimatePresence>
           <span className="sync-pill">
             {isSaving ? <Loader2 className="spin" size={15} /> : <Save size={15} />}
             {isSaving ? 'Saving' : hasUnsavedChanges ? 'Unsaved changes' : lastSaved ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Firestore ready'}
@@ -587,8 +582,8 @@ function App() {
                 <AreaChart data={isMomentumHovered ? stats.cgpaData : stats.semesterData}>
                   <defs>
                     <linearGradient id="sgpaFill" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor={isMomentumHovered ? '#1d4ed8' : '#2563eb'} stopOpacity={0.32} />
-                      <stop offset="100%" stopColor={isMomentumHovered ? '#1d4ed8' : '#2563eb'} stopOpacity={0.02} />
+                      <stop offset="0%" stopColor={isMomentumHovered ? '#dc2626' : '#2563eb'} stopOpacity={0.32} />
+                      <stop offset="100%" stopColor={isMomentumHovered ? '#dc2626' : '#2563eb'} stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="5 5" stroke="#dbe3ef" />
@@ -598,7 +593,7 @@ function App() {
                   <Area
                     type="monotone"
                     dataKey={isMomentumHovered ? 'CGPA' : 'SGPA'}
-                    stroke={isMomentumHovered ? '#1d4ed8' : '#2563eb'}
+                    stroke={isMomentumHovered ? '#dc2626' : '#2563eb'}
                     strokeWidth={3}
                     fill="url(#sgpaFill)"
                     animationDuration={260}

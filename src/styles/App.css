@@ -102,18 +102,7 @@
 .brand-mark {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.brand-icon {
-  width: 44px;
-  height: 44px;
-  border: 1px dashed rgba(15, 23, 42, 0.28);
-  border-radius: 16px;
-  display: grid;
-  place-items: center;
-  color: #111827;
-  background: rgba(226, 229, 235, 0.82);
+  gap: 10px;
 }
 
 .brand-mark p,
@@ -123,11 +112,12 @@
 
 .brand-mark p {
   color: #111827;
-  font-size: 1.02rem;
+  font-size: 1.12rem;
   font-weight: 800;
 }
 
-.brand-mark span {
+.brand-mark span,
+.user-tag {
   color: #6b7280;
   font-size: 0.86rem;
 }
@@ -293,10 +283,6 @@
 }
 
 .toast {
-  position: fixed;
-  right: 18px;
-  bottom: 92px;
-  z-index: 40;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -321,9 +307,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 36px;
 }
 
 .sync-pill,
+.user-tag,
 .sgpa-chip,
 .course-chip,
 .section-heading span {
@@ -338,6 +326,13 @@
   background: rgba(224, 228, 234, 0.5);
   font-size: 0.84rem;
   font-weight: 800;
+}
+
+.user-tag {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .manual-save-button {
@@ -464,8 +459,8 @@
 }
 
 .momentum-card:hover {
-  border-color: rgba(29, 78, 216, 0.4);
-  background: rgba(219, 226, 241, 0.62);
+  border-color: rgba(220, 38, 38, 0.36);
+  background: rgba(241, 222, 222, 0.42);
 }
 
 .chart-card h3 {
