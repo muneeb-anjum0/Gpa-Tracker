@@ -450,8 +450,11 @@
 
 .chart-card {
   border-radius: 24px;
-  padding: 16px;
+  min-height: 330px;
+  padding: 14px 12px 12px;
   overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .momentum-card {
@@ -485,7 +488,8 @@
 }
 
 .chart-card h3 {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
+  padding-left: 4px;
   font-size: 0.98rem;
 }
 
