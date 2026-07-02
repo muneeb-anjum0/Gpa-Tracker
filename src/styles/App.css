@@ -408,18 +408,23 @@
   padding: 76px 18px 24px;
   background: rgba(238, 240, 244, 0.78);
   backdrop-filter: blur(8px);
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .feature-command {
   width: min(1060px, 100%);
-  max-height: min(760px, calc(100vh - 104px));
+  height: min(760px, calc(100vh - 104px));
+  max-height: calc(100vh - 104px);
   overflow: hidden;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
   padding: 12px;
   border: 1px dashed rgba(15, 23, 42, 0.24);
   border-radius: 28px;
   background: rgba(230, 233, 238, 0.96);
+  overscroll-behavior: contain;
 }
 
 .feature-command-top {
@@ -450,7 +455,7 @@
 }
 
 .feature-layout {
-  min-height: 500px;
+  min-height: 0;
   display: grid;
   grid-template-columns: 290px minmax(0, 1fr);
   gap: 12px;
@@ -463,6 +468,7 @@
   border: 1px dashed rgba(15, 23, 42, 0.18);
   border-radius: 22px;
   background: rgba(224, 228, 234, 0.48);
+  overscroll-behavior: contain;
 }
 
 .feature-nav {
@@ -471,6 +477,7 @@
   gap: 8px;
   padding: 10px;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .feature-nav button {
@@ -502,6 +509,7 @@
   gap: 14px;
   padding: 16px;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .feature-panel-heading {

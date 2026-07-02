@@ -375,6 +375,11 @@ function App() {
   }, [])
 
   useEffect(() => {
+    document.body.classList.toggle('modal-scroll-lock', isCommandOpen)
+    return () => document.body.classList.remove('modal-scroll-lock')
+  }, [isCommandOpen])
+
+  useEffect(() => {
     if (!firebaseReady) {
       setAuthLoading(false)
       return undefined
@@ -988,9 +993,10 @@ function FeatureCommandCenter({
   return (
     <AnimatePresence>
       {isOpen && (
-        <Motion.div className="feature-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <Motion.div className="feature-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onWheel={(event) => event.stopPropagation()}>
           <Motion.section
             className="feature-command"
+            onWheel={(event) => event.stopPropagation()}
             initial={{ opacity: 0, y: 18, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}

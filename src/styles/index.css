@@ -20,6 +20,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body.modal-scroll-lock {
+  overflow: hidden;
+}
+
 button,
 input,
 select {
