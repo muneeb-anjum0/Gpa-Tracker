@@ -406,10 +406,8 @@
   display: grid;
   place-items: start center;
   padding: 76px 18px 24px;
-  background: rgba(238, 240, 244, 0.78);
-  backdrop-filter: blur(8px);
-  overflow: hidden;
-  overscroll-behavior: contain;
+  background: rgba(238, 240, 244, 0.92);
+  overflow: clip;
 }
 
 .feature-command {
@@ -424,7 +422,7 @@
   border: 1px dashed rgba(15, 23, 42, 0.24);
   border-radius: 28px;
   background: rgba(230, 233, 238, 0.96);
-  overscroll-behavior: contain;
+  contain: layout paint;
 }
 
 .feature-command-top {
@@ -468,7 +466,6 @@
   border: 1px dashed rgba(15, 23, 42, 0.18);
   border-radius: 22px;
   background: rgba(224, 228, 234, 0.48);
-  overscroll-behavior: contain;
 }
 
 .feature-nav {
@@ -477,6 +474,7 @@
   gap: 8px;
   padding: 10px;
   overflow: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -509,7 +507,9 @@
   gap: 14px;
   padding: 16px;
   overflow: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  will-change: scroll-position;
 }
 
 .feature-panel-heading {
@@ -717,6 +717,10 @@
 .scheme-card:hover {
   border-color: rgba(15, 23, 42, 0.34);
   background: rgba(238, 240, 244, 0.82);
+}
+
+.feature-command * {
+  scroll-behavior: auto;
 }
 
 .icon-action,
@@ -1022,6 +1026,7 @@
   }
 
   .feature-command {
+    height: calc(100vh - 28px);
     max-height: calc(100vh - 28px);
     border-radius: 22px;
   }
@@ -1029,12 +1034,13 @@
   .feature-layout {
     min-height: 0;
     grid-template-columns: 1fr;
-    overflow: auto;
+    overflow: hidden;
   }
 
   .feature-nav {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .feature-nav button {
