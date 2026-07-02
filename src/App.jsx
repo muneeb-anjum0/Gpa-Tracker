@@ -20,22 +20,31 @@ import {
 } from 'recharts'
 import {
   Activity,
+  AlertTriangle,
+  ArrowRight,
   BarChart3,
   BookOpen,
   ChevronDown,
   ChevronUp,
   Download,
+  FileText,
   GraduationCap,
   LineChart as LineChartIcon,
   Loader2,
   Lock,
   LogOut,
   Plus,
+  Route,
   Save,
+  School,
+  Search,
+  ShieldAlert,
   Sparkles,
+  Target,
   Trash2,
   Upload,
   UserPlus,
+  X,
 } from 'lucide-react'
 import {
   browserLocalPersistence,
@@ -56,31 +65,94 @@ import Dock from './components/Dock'
 import { auth, CURRENT_GRADES_FILE, db, firebaseReady } from './lib/firebase'
 import './styles/App.css'
 
-const GRADE_SCHEME = {
-  'A+': 4,
-  A: 3.75,
-  'A-': 3.5,
-  'B+': 3.25,
-  B: 3,
-  'B-': 2.75,
-  'C+': 2.5,
-  C: 2,
-  'C-': 1.5,
-  F: 0,
+const UNIVERSITY_SCHEMES = {
+  zab: {
+    name: 'ZAB / 4.00 scale',
+    max: 4,
+    points: {
+      'A+': 4,
+      A: 3.75,
+      'A-': 3.5,
+      'B+': 3.25,
+      B: 3,
+      'B-': 2.75,
+      'C+': 2.5,
+      C: 2,
+      'C-': 1.5,
+      F: 0,
+    },
+    ranges: {
+      'A+': '90+',
+      A: '85-89',
+      'A-': '80-84',
+      'B+': '75-79',
+      B: '70-74',
+      'B-': '66-69',
+      'C+': '63-65',
+      C: '60-62',
+      'C-': '55-59',
+      F: '0-54',
+    },
+  },
+  standard: {
+    name: 'Standard 4.00 scale',
+    max: 4,
+    points: {
+      A: 4,
+      'A-': 3.7,
+      'B+': 3.3,
+      B: 3,
+      'B-': 2.7,
+      'C+': 2.3,
+      C: 2,
+      'C-': 1.7,
+      D: 1,
+      F: 0,
+    },
+    ranges: {
+      A: '93-100',
+      'A-': '90-92',
+      'B+': '87-89',
+      B: '83-86',
+      'B-': '80-82',
+      'C+': '77-79',
+      C: '73-76',
+      'C-': '70-72',
+      D: '60-69',
+      F: '0-59',
+    },
+  },
+  fivePoint: {
+    name: '5.00 honors scale',
+    max: 5,
+    points: {
+      'A+': 5,
+      A: 4.75,
+      'A-': 4.5,
+      'B+': 4,
+      B: 3.5,
+      'B-': 3,
+      'C+': 2.5,
+      C: 2,
+      D: 1,
+      F: 0,
+    },
+    ranges: {
+      'A+': '95-100',
+      A: '90-94',
+      'A-': '85-89',
+      'B+': '80-84',
+      B: '75-79',
+      'B-': '70-74',
+      'C+': '65-69',
+      C: '60-64',
+      D: '50-59',
+      F: '0-49',
+    },
+  },
 }
 
-const GRADE_RANGES = {
-  'A+': '90+',
-  A: '85-89',
-  'A-': '80-84',
-  'B+': '75-79',
-  B: '70-74',
-  'B-': '66-69',
-  'C+': '63-65',
-  C: '60-62',
-  'C-': '55-59',
-  F: '0-54',
-}
+const DEFAULT_SCHEME_KEY = 'zab'
 
 const CHART_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#0f766e', '#f97316', '#64748b', '#db2777', '#111827']
 const GRADE_BAR_COLORS = ['#4f46e5', '#7c3aed', '#db2777', '#f97316', '#f59e0b', '#10b981', '#0ea5e9', '#64748b', '#ef4444', '#111827']
@@ -89,8 +161,12 @@ const SESSION_STARTED_AT_KEY = 'gpa-track-session-started-at'
 const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 const CHART_MARGIN = { top: 6, right: 0, bottom: 0, left: -28 }
 
-function getPoints(grade) {
-  return GRADE_SCHEME[grade] ?? 0
+function getScheme(key) {
+  return UNIVERSITY_SCHEMES[key] || UNIVERSITY_SCHEMES[DEFAULT_SCHEME_KEY]
+}
+
+function getPoints(grade, scheme = getScheme(DEFAULT_SCHEME_KEY)) {
+  return scheme.points[grade] ?? 0
 }
 
 function getCredits(course) {
@@ -98,18 +174,18 @@ function getCredits(course) {
   return Number.isFinite(value) ? value : 0
 }
 
-function calculateSGPA(semester) {
+function calculateSGPA(semester, scheme = getScheme(DEFAULT_SCHEME_KEY)) {
   const totalCredits = semester.courses.reduce((sum, course) => sum + getCredits(course), 0)
-  const totalPoints = semester.courses.reduce((sum, course) => sum + getPoints(course.grade) * getCredits(course), 0)
+  const totalPoints = semester.courses.reduce((sum, course) => sum + getPoints(course.grade, scheme) * getCredits(course), 0)
   return totalCredits > 0 ? Number((totalPoints / totalCredits).toFixed(2)) : 0
 }
 
-function calculateCGPA(semesters) {
+function calculateCGPA(semesters, scheme = getScheme(DEFAULT_SCHEME_KEY)) {
   const totals = semesters.reduce(
     (result, semester) => {
       semester.courses.forEach((course) => {
         const credits = getCredits(course)
-        result.points += getPoints(course.grade) * credits
+        result.points += getPoints(course.grade, scheme) * credits
         result.credits += credits
       })
       return result
@@ -273,8 +349,30 @@ function App() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isMomentumHovered, setIsMomentumHovered] = useState(false)
   const [isGradeHovered, setIsGradeHovered] = useState(false)
+  const [isCommandOpen, setIsCommandOpen] = useState(false)
+  const [activeFeature, setActiveFeature] = useState('goals')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [targetCgpa, setTargetCgpa] = useState('3.50')
+  const [plannedCredits, setPlannedCredits] = useState('15')
+  const [selectedSchemeKey, setSelectedSchemeKey] = useState(DEFAULT_SCHEME_KEY)
   const fileInputRef = useRef(null)
   const userHandle = user?.email?.split('@')[0] || 'user'
+  const activeScheme = getScheme(selectedSchemeKey)
+
+  useEffect(() => {
+    const handleShortcut = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setIsCommandOpen(true)
+      }
+      if (event.key === 'Escape') {
+        setIsCommandOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [])
 
   useEffect(() => {
     if (!firebaseReady) {
@@ -317,6 +415,7 @@ function App() {
           const data = snapshot.data()
           const nextSemesters = normalizeSemesters(data.semesters)
           setSemesters(nextSemesters)
+          setSelectedSchemeKey(data.gradeScale || DEFAULT_SCHEME_KEY)
           setLastSaved(data.updatedAt?.toDate?.() || null)
           setExpandedSemesters(new Set())
           setHasUnsavedChanges(false)
@@ -328,6 +427,7 @@ function App() {
         await setDoc(fileRef, {
           fileName: CURRENT_GRADES_FILE,
           semesters: starter,
+          gradeScale: DEFAULT_SCHEME_KEY,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         })
@@ -346,14 +446,14 @@ function App() {
   }, [user])
 
   const stats = useMemo(() => {
-    const cgpa = calculateCGPA(semesters)
+    const cgpa = calculateCGPA(semesters, activeScheme)
     const totalCredits = semesters.reduce((sum, semester) => sum + semester.courses.reduce((courseSum, course) => courseSum + getCredits(course), 0), 0)
     const totalCourses = semesters.reduce((sum, semester) => sum + semester.courses.length, 0)
     const chronologicalSemesters = [...semesters].sort((a, b) => Number(a.id) - Number(b.id))
     const semesterData = chronologicalSemesters.map((semester, index) => ({
       name: semester.name,
       shortName: `S${index + 1}`,
-      SGPA: calculateSGPA(semester),
+      SGPA: calculateSGPA(semester, activeScheme),
       credits: semester.courses.reduce((sum, course) => sum + getCredits(course), 0),
       courses: semester.courses.length,
     }))
@@ -362,7 +462,7 @@ function App() {
     const cgpaData = chronologicalSemesters.map((semester, index) => {
       semester.courses.forEach((course) => {
         const credits = getCredits(course)
-        cumulativePoints += getPoints(course.grade) * credits
+        cumulativePoints += getPoints(course.grade, activeScheme) * credits
         cumulativeCredits += credits
       })
 
@@ -372,11 +472,11 @@ function App() {
         CGPA: cumulativeCredits > 0 ? Number((cumulativePoints / cumulativeCredits).toFixed(2)) : 0,
       }
     })
-    const distribution = Object.keys(GRADE_SCHEME).map((grade) => ({
+    const distribution = Object.keys(activeScheme.points).map((grade) => ({
       grade,
       count: semesters.reduce((count, semester) => count + semester.courses.filter((course) => course.grade === grade).length, 0),
     })).filter((item) => item.count > 0)
-    const gradeCreditData = Object.keys(GRADE_SCHEME).map((grade) => ({
+    const gradeCreditData = Object.keys(activeScheme.points).map((grade) => ({
       grade,
       credits: Number(semesters.reduce((total, semester) => (
         total + semester.courses
@@ -395,13 +495,48 @@ function App() {
     const weightedCourses = semesters.flatMap((semester) => semester.courses.map((course) => ({
       name: course.name || 'Untitled course',
       shortName: (course.name || 'Course').replace(/^Lab:\s*/i, '').slice(0, 14),
-      impact: Number((getCredits(course) * (4 - getPoints(course.grade))).toFixed(2)),
+      impact: Number((getCredits(course) * (activeScheme.max - getPoints(course.grade, activeScheme))).toFixed(2)),
       grade: course.grade,
       credits: getCredits(course),
     }))).sort((a, b) => b.impact - a.impact).slice(0, 6)
+    const lowSemesters = semesterData.filter((item) => item.SGPA > 0 && item.SGPA < Math.min(2.5, activeScheme.max * 0.63))
+    const recent = semesterData.at(-1) || { SGPA: 0, name: 'No semester' }
+    const riskPoints = lowSemesters.length + (trend < -0.2 ? 1 : 0) + (recent.SGPA > 0 && recent.SGPA < activeScheme.max * 0.7 ? 1 : 0)
+    const riskLevel = riskPoints >= 3 ? 'High' : riskPoints >= 1 ? 'Medium' : 'Low'
+    const averageCredits = semesterData.length ? Number((totalCredits / semesterData.length).toFixed(1)) : 0
 
-    return { cgpa, totalCredits, totalCourses, semesterData, cgpaData, distribution, gradeCreditData, quality, best, attention, trend, weightedCourses }
-  }, [semesters])
+    return { cgpa, totalCredits, totalCourses, semesterData, cgpaData, distribution, gradeCreditData, quality, best, attention, trend, weightedCourses, lowSemesters, recent, riskLevel, averageCredits }
+  }, [semesters, activeScheme])
+
+  const featureInsights = useMemo(() => {
+    const target = Number.parseFloat(targetCgpa)
+    const credits = Number.parseFloat(plannedCredits)
+    const currentPoints = stats.cgpa * stats.totalCredits
+    const requiredSgpa = Number.isFinite(target) && Number.isFinite(credits) && credits > 0
+      ? Number(((target * (stats.totalCredits + credits) - currentPoints) / credits).toFixed(2))
+      : 0
+    const boundedSgpa = Math.max(0, Math.min(activeScheme.max, requiredSgpa))
+    const targetLabel = requiredSgpa > activeScheme.max ? `Above ${activeScheme.max.toFixed(2)}` : boundedSgpa.toFixed(2)
+    const strategyCourse = stats.weightedCourses[0]
+    const reportLines = [
+      'GPA Tracker Academic Report',
+      `CGPA: ${stats.cgpa.toFixed(2)} / ${activeScheme.max.toFixed(2)}`,
+      `Credits completed: ${stats.totalCredits}`,
+      `Courses tracked: ${stats.totalCourses}`,
+      `Best semester: ${stats.best.name === 'None' ? 'Not available' : `${stats.best.name} (${stats.best.SGPA.toFixed(2)})`}`,
+      `Focus semester: ${stats.attention.name === 'None' ? 'Not available' : `${stats.attention.name} (${stats.attention.SGPA.toFixed(2)})`}`,
+      `Risk level: ${stats.riskLevel}`,
+      `Grade scale: ${activeScheme.name}`,
+    ]
+
+    return {
+      requiredSgpa,
+      targetLabel,
+      targetIsPossible: requiredSgpa <= activeScheme.max,
+      strategyCourse,
+      reportText: reportLines.join('\n'),
+    }
+  }, [activeScheme, plannedCredits, stats, targetCgpa])
 
   const displaySemesters = useMemo(
     () => [...semesters].sort((a, b) => Number(b.id) - Number(a.id)),
@@ -479,6 +614,12 @@ function App() {
     markUnsaved()
   }
 
+  const updateGradeScale = (schemeKey) => {
+    setSelectedSchemeKey(schemeKey)
+    markUnsaved()
+    announce(`${getScheme(schemeKey).name} applied`)
+  }
+
   const deleteCourse = (semesterId, courseId) => {
     setSemesters((current) => current.map((semester) => (
       semester.id === semesterId
@@ -529,6 +670,7 @@ function App() {
         {
           fileName: CURRENT_GRADES_FILE,
           semesters,
+          gradeScale: selectedSchemeKey,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
@@ -576,6 +718,11 @@ function App() {
           <p>GPA-Track</p>
           <span className="user-tag">{userHandle}</span>
         </div>
+        <button className="feature-search" type="button" onClick={() => setIsCommandOpen(true)}>
+          <Search size={16} />
+          <span>Search tools, plans, risks...</span>
+          <kbd>Ctrl K</kbd>
+        </button>
         <div className="header-meta">
           <AnimatePresence>
             {statusMessage && (
@@ -598,11 +745,29 @@ function App() {
         </div>
       </Motion.header>
 
+      <FeatureCommandCenter
+        activeFeature={activeFeature}
+        activeScheme={activeScheme}
+        featureInsights={featureInsights}
+        isOpen={isCommandOpen}
+        onClose={() => setIsCommandOpen(false)}
+        onFeatureChange={setActiveFeature}
+        onPlannedCreditsChange={setPlannedCredits}
+        onSearchChange={setSearchQuery}
+        onTargetCgpaChange={setTargetCgpa}
+        onUpdateGradeScale={updateGradeScale}
+        plannedCredits={plannedCredits}
+        searchQuery={searchQuery}
+        selectedSchemeKey={selectedSchemeKey}
+        stats={stats}
+        targetCgpa={targetCgpa}
+      />
+
       <section className="hero-band">
         <Motion.div className="hero-copy" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
           <p className="eyebrow">CURRENT-GRADES.json / Firestore</p>
           <h1>{stats.cgpa.toFixed(2)}</h1>
-          <span>Current CGPA across {stats.totalCredits} credit hours</span>
+          <span>Current CGPA across {stats.totalCredits} credit hours / {activeScheme.name}</span>
         </Motion.div>
         <div className="metric-grid">
           <Metric icon={BookOpen} label="Courses" value={stats.totalCourses} />
@@ -731,7 +896,7 @@ function App() {
                       {expandedSemesters.has(semester.id) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                     </button>
                     <input className="semester-name" value={semester.name} onChange={(event) => updateSemesterName(semester.id, event.target.value)} />
-                    <span className="sgpa-chip">SGPA {calculateSGPA(semester).toFixed(2)}</span>
+                    <span className="sgpa-chip">SGPA {calculateSGPA(semester, activeScheme).toFixed(2)}</span>
                     <span className="course-chip">{semester.courses.length} courses</span>
                     <span className="course-chip">{semester.courses.reduce((sum, course) => sum + getCredits(course), 0)} credits</span>
                     <button className="icon-action danger" type="button" onClick={() => deleteSemester(semester.id)} aria-label="Delete semester">
@@ -746,9 +911,9 @@ function App() {
                           <input value={course.name} placeholder="Course name" onChange={(event) => updateCourse(semester.id, course.id, 'name', event.target.value)} />
                           <input type="number" min="0" max="9" step="0.5" value={course.creditHours} onChange={(event) => updateCourse(semester.id, course.id, 'creditHours', event.target.value)} />
                           <select value={course.grade} onChange={(event) => updateCourse(semester.id, course.id, 'grade', event.target.value)}>
-                            {Object.keys(GRADE_SCHEME).map((grade) => (
+                            {Array.from(new Set([...Object.keys(activeScheme.points), course.grade])).map((grade) => (
                               <option key={grade} value={grade}>
-                                {grade} / {GRADE_RANGES[grade]} / {GRADE_SCHEME[grade]}
+                                {grade} / {activeScheme.ranges[grade] || 'custom'} / {activeScheme.points[grade] ?? 0}
                               </option>
                             ))}
                           </select>
@@ -772,6 +937,205 @@ function App() {
 
       <Dock items={dockItems} panelHeight={64} baseItemSize={40} magnification={46} distance={100} dockHeight={92} />
     </main>
+  )
+}
+
+const FEATURE_ITEMS = [
+  { id: 'goals', title: 'Goal Planning', icon: Target, hint: 'Target CGPA and required SGPA' },
+  { id: 'risk', title: 'Academic Risk Detection', icon: ShieldAlert, hint: 'Trend, low semesters, and focus level' },
+  { id: 'strategy', title: 'Course Strategy', icon: Route, hint: 'Credit-weighted course impact' },
+  { id: 'reports', title: 'Exportable Reports', icon: FileText, hint: 'Copy a clean academic summary' },
+  { id: 'universities', title: 'Multi-University Support', icon: School, hint: 'Switch grading scale presets' },
+]
+
+function FeatureCommandCenter({
+  activeFeature,
+  activeScheme,
+  featureInsights,
+  isOpen,
+  onClose,
+  onFeatureChange,
+  onPlannedCreditsChange,
+  onSearchChange,
+  onTargetCgpaChange,
+  onUpdateGradeScale,
+  plannedCredits,
+  searchQuery,
+  selectedSchemeKey,
+  stats,
+  targetCgpa,
+}) {
+  const filteredFeatures = FEATURE_ITEMS.filter((item) => (
+    `${item.title} ${item.hint}`.toLowerCase().includes(searchQuery.toLowerCase())
+  ))
+  const currentFeature = FEATURE_ITEMS.find((item) => item.id === activeFeature) || FEATURE_ITEMS[0]
+  const CurrentIcon = currentFeature.icon
+
+  const copyReport = async () => {
+    await navigator.clipboard.writeText(featureInsights.reportText)
+  }
+
+  const downloadReport = () => {
+    const blob = new Blob([featureInsights.reportText], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'gpa-tracker-report.txt'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <Motion.div className="feature-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <Motion.section
+            className="feature-command"
+            initial={{ opacity: 0, y: 18, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ duration: 0.18 }}
+          >
+            <div className="feature-command-top">
+              <div className="feature-input-wrap">
+                <Search size={17} />
+                <input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(event) => onSearchChange(event.target.value)}
+                  placeholder="Search Goal Planning, Risk, Strategy..."
+                />
+              </div>
+              <button className="icon-action" type="button" onClick={onClose} aria-label="Close tools">
+                <X size={17} />
+              </button>
+            </div>
+
+            <div className="feature-layout">
+              <nav className="feature-nav" aria-label="Academic tools">
+                {filteredFeatures.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <button
+                      className={activeFeature === item.id ? 'active' : ''}
+                      key={item.id}
+                      type="button"
+                      onClick={() => onFeatureChange(item.id)}
+                    >
+                      <Icon size={18} />
+                      <span>{item.title}</span>
+                    </button>
+                  )
+                })}
+              </nav>
+
+              <div className="feature-panel">
+                <div className="feature-panel-heading">
+                  <CurrentIcon size={20} />
+                  <div>
+                    <h2>{currentFeature.title}</h2>
+                    <p>{currentFeature.hint}</p>
+                  </div>
+                </div>
+
+                {activeFeature === 'goals' && (
+                  <div className="tool-grid">
+                    <label className="tool-field">
+                      Target CGPA
+                      <input min="0" max={activeScheme.max} step="0.01" type="number" value={targetCgpa} onChange={(event) => onTargetCgpaChange(event.target.value)} />
+                    </label>
+                    <label className="tool-field">
+                      Next credits
+                      <input min="1" step="0.5" type="number" value={plannedCredits} onChange={(event) => onPlannedCreditsChange(event.target.value)} />
+                    </label>
+                    <div className="tool-result emphasis">
+                      <span>Required next SGPA</span>
+                      <strong>{featureInsights.targetLabel}</strong>
+                      <p>{featureInsights.targetIsPossible ? 'Possible within the selected scale.' : 'Target needs more credits or multiple semesters.'}</p>
+                    </div>
+                  </div>
+                )}
+
+                {activeFeature === 'risk' && (
+                  <div className="tool-grid">
+                    <div className={`tool-result risk-${stats.riskLevel.toLowerCase()}`}>
+                      <AlertTriangle size={18} />
+                      <span>Risk level</span>
+                      <strong>{stats.riskLevel}</strong>
+                    </div>
+                    <div className="tool-result">
+                      <span>Recent momentum</span>
+                      <strong>{stats.trend >= 0 ? '+' : ''}{stats.trend.toFixed(2)}</strong>
+                      <p>Change from the previous semester.</p>
+                    </div>
+                    <div className="mini-list">
+                      {stats.lowSemesters.length ? stats.lowSemesters.map((semester) => (
+                        <span key={semester.name}>{semester.name} needs attention at {semester.SGPA.toFixed(2)}</span>
+                      )) : <span>No low-performing semester detected.</span>}
+                    </div>
+                  </div>
+                )}
+
+                {activeFeature === 'strategy' && (
+                  <div className="strategy-list">
+                    {stats.weightedCourses.length ? stats.weightedCourses.map((course) => (
+                      <div className="strategy-row" key={`${course.name}-${course.grade}`}>
+                        <div>
+                          <strong>{course.name}</strong>
+                          <span>{course.credits} credits / {course.grade}</span>
+                        </div>
+                        <span className="impact-pill">{course.impact.toFixed(2)} upside</span>
+                      </div>
+                    )) : <div className="tool-result">Add courses to calculate course strategy.</div>}
+                    {featureInsights.strategyCourse && (
+                      <div className="tool-result emphasis">
+                        <span>Best next move</span>
+                        <strong>{featureInsights.strategyCourse.name}</strong>
+                        <p>Higher credits and lower grade points make this the strongest improvement candidate.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeFeature === 'reports' && (
+                  <div className="report-tool">
+                    <pre>{featureInsights.reportText}</pre>
+                    <div className="report-actions">
+                      <button className="primary-action" type="button" onClick={copyReport}>
+                        <FileText size={17} />
+                        Copy report
+                      </button>
+                      <button className="soft-action" type="button" onClick={downloadReport}>
+                        <Download size={17} />
+                        Download .txt
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeFeature === 'universities' && (
+                  <div className="scheme-grid">
+                    {Object.entries(UNIVERSITY_SCHEMES).map(([schemeKey, scheme]) => (
+                      <button
+                        className={selectedSchemeKey === schemeKey ? 'scheme-card active' : 'scheme-card'}
+                        key={schemeKey}
+                        type="button"
+                        onClick={() => onUpdateGradeScale(schemeKey)}
+                      >
+                        <span>{scheme.name}</span>
+                        <strong>{scheme.max.toFixed(2)}</strong>
+                        <small>{Object.keys(scheme.points).slice(0, 4).join(', ')}...</small>
+                        <ArrowRight size={16} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Motion.section>
+        </Motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
