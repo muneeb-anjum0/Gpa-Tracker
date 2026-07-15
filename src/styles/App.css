@@ -1058,37 +1058,175 @@
     flex-direction: column;
   }
 
-  .metric-grid,
-  .dashboard-grid,
+  .hero-band {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 10px;
+    align-items: stretch;
+    padding: 10px;
+    border-radius: 19px;
+  }
+
+  .hero-copy {
+    min-height: 106px;
+    align-content: center;
+    justify-items: center;
+    gap: 4px;
+    padding: 10px 6px;
+    border: 1px dashed rgba(15, 23, 42, 0.16);
+    border-radius: 16px;
+    background: rgba(238, 240, 244, 0.48);
+    text-align: center;
+  }
+
+  .hero-copy .eyebrow {
+    max-width: 76px;
+    overflow: hidden;
+    font-size: 0.52rem;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hero-copy h1 {
+    font-size: 2.45rem;
+    line-height: 0.9;
+  }
+
+  .hero-copy span {
+    max-width: 82px;
+    overflow: hidden;
+    font-size: 0.58rem;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .metric-card {
+    min-height: 50px;
+    padding: 8px;
+    border-radius: 15px;
+    align-content: center;
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 2px 6px;
+  }
+
+  .metric-card svg {
+    grid-row: span 2;
+    width: 16px;
+    height: 16px;
+    align-self: center;
+  }
+
+  .metric-card span {
+    overflow: hidden;
+    font-size: 0.58rem;
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .metric-card strong {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .chart-card {
+    min-height: 174px;
+    padding: 9px 6px 6px;
+    border-radius: 17px;
+  }
+
+  .chart-card h3 {
+    margin: 0 0 2px;
+    padding-left: 2px;
+    font-size: 0.72rem;
+    line-height: 1.1;
+  }
+
   .insight-strip {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .insight-card {
+    min-width: 0;
+    gap: 3px;
+    padding: 9px 7px;
+    border-radius: 16px;
+  }
+
+  .insight-card span,
+  .insight-card p {
+    overflow: hidden;
+    font-size: 0.62rem;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .insight-card strong {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.92rem;
+    line-height: 1.05;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .work-area {
-    gap: 10px;
+    gap: 8px;
   }
 
   .section-heading {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     gap: 8px;
+  }
+
+  .section-heading div {
+    min-width: 0;
+  }
+
+  .section-heading h2 {
+    margin-top: 1px;
+    font-size: 1.18rem;
   }
 
   .section-heading span {
     max-width: 100%;
-    min-height: 30px;
-    font-size: 0.74rem;
+    min-height: 28px;
+    overflow: hidden;
+    font-size: 0.62rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .semester-card {
-    padding: 10px;
-    border-radius: 20px;
+    padding: 8px;
+    border-radius: 17px;
   }
 
   .semester-header {
-    grid-template-columns: 38px minmax(0, 1fr) 38px;
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
     grid-template-areas:
-      "toggle name delete"
+      "delete name toggle"
       "meta meta meta";
-    gap: 8px;
+    gap: 7px;
   }
 
   .semester-header .collapse-button {
@@ -1097,8 +1235,10 @@
 
   .semester-header .semester-name {
     grid-area: name;
+    min-height: 38px;
     min-width: 0;
-    font-size: 0.96rem;
+    border-radius: 13px;
+    font-size: 0.86rem;
   }
 
   .semester-header .danger {
@@ -1107,9 +1247,12 @@
 
   .semester-header .sgpa-chip,
   .semester-header .course-chip {
-    min-height: 29px;
-    padding: 0 9px;
-    font-size: 0.75rem;
+    min-height: 26px;
+    padding: 0 7px;
+    font-size: 0.64rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .semester-header .sgpa-chip {
@@ -1133,23 +1276,30 @@
 
   .collapse-button,
   .icon-action {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
   }
 
   .courses {
-    gap: 8px;
-    padding-top: 9px;
+    gap: 7px;
+    padding-top: 7px;
   }
 
   .course-row {
-    grid-template-columns: minmax(0, 1fr) 86px 38px;
+    grid-template-columns: 68px minmax(0, 1fr) 36px;
     grid-template-areas:
       "course course course"
       "credits grade remove";
-    gap: 8px;
-    padding: 8px;
-    border-radius: 18px;
+    gap: 7px;
+    padding: 7px;
+    border-radius: 15px;
+  }
+
+  .course-row input,
+  .course-row select {
+    min-height: 38px;
+    border-radius: 12px;
+    font-size: 0.78rem;
   }
 
   .course-row input:first-child {
@@ -1172,12 +1322,57 @@
   }
 
   .add-course {
-    min-height: 42px;
-    border-radius: 18px;
+    min-height: 38px;
+    border-radius: 15px;
+    font-size: 0.82rem;
   }
 }
 
 @media (max-width: 420px) {
+  .app-shell {
+    padding-inline: 10px;
+    gap: 10px;
+  }
+
+  .hero-band {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .hero-copy {
+    min-height: 98px;
+    border-radius: 15px;
+  }
+
+  .hero-copy h1 {
+    font-size: 2.12rem;
+  }
+
+  .metric-grid,
+  .dashboard-grid {
+    gap: 6px;
+  }
+
+  .metric-card {
+    min-height: 46px;
+    padding: 7px;
+  }
+
+  .chart-card {
+    min-height: 156px;
+    border-radius: 15px;
+  }
+
+  .insight-strip {
+    gap: 6px;
+  }
+
+  .insight-card {
+    padding: 8px 6px;
+    border-radius: 14px;
+  }
+
   .semester-header {
     grid-template-columns: 36px minmax(0, 1fr) 36px;
   }
