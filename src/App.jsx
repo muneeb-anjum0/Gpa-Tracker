@@ -63,96 +63,15 @@ import {
 import starterGrades from './data/current-grades.json'
 import Dock from './components/Dock'
 import { auth, CURRENT_GRADES_FILE, db, firebaseReady } from './lib/firebase'
+import {
+  DEFAULT_SCHEME_KEY,
+  MAX_JSON_IMPORT_BYTES,
+  UNIVERSITY_SCHEMES,
+  getScheme,
+  isValidGradeScale,
+  sanitizeSemesters,
+} from './lib/grades'
 import './styles/App.css'
-
-const UNIVERSITY_SCHEMES = {
-  zab: {
-    name: 'ZAB / 4.00 scale',
-    max: 4,
-    points: {
-      'A+': 4,
-      A: 3.75,
-      'A-': 3.5,
-      'B+': 3.25,
-      B: 3,
-      'B-': 2.75,
-      'C+': 2.5,
-      C: 2,
-      'C-': 1.5,
-      F: 0,
-    },
-    ranges: {
-      'A+': '90+',
-      A: '85-89',
-      'A-': '80-84',
-      'B+': '75-79',
-      B: '70-74',
-      'B-': '66-69',
-      'C+': '63-65',
-      C: '60-62',
-      'C-': '55-59',
-      F: '0-54',
-    },
-  },
-  standard: {
-    name: 'Standard 4.00 scale',
-    max: 4,
-    points: {
-      A: 4,
-      'A-': 3.7,
-      'B+': 3.3,
-      B: 3,
-      'B-': 2.7,
-      'C+': 2.3,
-      C: 2,
-      'C-': 1.7,
-      D: 1,
-      F: 0,
-    },
-    ranges: {
-      A: '93-100',
-      'A-': '90-92',
-      'B+': '87-89',
-      B: '83-86',
-      'B-': '80-82',
-      'C+': '77-79',
-      C: '73-76',
-      'C-': '70-72',
-      D: '60-69',
-      F: '0-59',
-    },
-  },
-  fivePoint: {
-    name: '5.00 honors scale',
-    max: 5,
-    points: {
-      'A+': 5,
-      A: 4.75,
-      'A-': 4.5,
-      'B+': 4,
-      B: 3.5,
-      'B-': 3,
-      'C+': 2.5,
-      C: 2,
-      D: 1,
-      F: 0,
-    },
-    ranges: {
-      'A+': '95-100',
-      A: '90-94',
-      'A-': '85-89',
-      'B+': '80-84',
-      B: '75-79',
-      'B-': '70-74',
-      'C+': '65-69',
-      C: '60-64',
-      D: '50-59',
-      F: '0-49',
-    },
-  },
-}
-
-const DEFAULT_SCHEME_KEY = 'zab'
 
 const CHART_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#0f766e', '#f97316', '#64748b', '#db2777', '#111827']
 const GRADE_BAR_COLORS = ['#4f46e5', '#7c3aed', '#db2777', '#f97316', '#f59e0b', '#10b981', '#0ea5e9', '#64748b', '#ef4444', '#111827']
@@ -160,10 +79,6 @@ const EMPTY_SEMESTERS = []
 const SESSION_STARTED_AT_KEY = 'gpa-track-session-started-at'
 const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 const CHART_MARGIN = { top: 6, right: 0, bottom: 0, left: -28 }
-
-function getScheme(key) {
-  return UNIVERSITY_SCHEMES[key] || UNIVERSITY_SCHEMES[DEFAULT_SCHEME_KEY]
-}
 
 function getPoints(grade, scheme = getScheme(DEFAULT_SCHEME_KEY)) {
   return scheme.points[grade] ?? 0
@@ -198,10 +113,6 @@ function calculateCGPA(semesters, scheme = getScheme(DEFAULT_SCHEME_KEY)) {
 
 function cloneGrades(grades) {
   return JSON.parse(JSON.stringify(grades))
-}
-
-function normalizeSemesters(value) {
-  return Array.isArray(value) ? value : EMPTY_SEMESTERS
 }
 
 function startSessionWindow() {
@@ -247,9 +158,9 @@ function AuthScreen({ authError, setAuthError }) {
       } else {
         await createUserWithEmailAndPassword(auth, email, password)
       }
-    } catch (error) {
+    } catch {
       clearSessionWindow()
-      setAuthError(error.message.replace('Firebase: ', ''))
+      setAuthError('Unable to sign in with those credentials. Check your email and password, then try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -418,9 +329,9 @@ function App() {
       async (snapshot) => {
         if (snapshot.exists()) {
           const data = snapshot.data()
-          const nextSemesters = normalizeSemesters(data.semesters)
+          const nextSemesters = sanitizeSemesters(data.semesters)
           setSemesters(nextSemesters)
-          setSelectedSchemeKey(data.gradeScale || DEFAULT_SCHEME_KEY)
+          setSelectedSchemeKey(isValidGradeScale(data.gradeScale) ? data.gradeScale : DEFAULT_SCHEME_KEY)
           setLastSaved(data.updatedAt?.toDate?.() || null)
           setExpandedSemesters(new Set())
           setHasUnsavedChanges(false)
@@ -428,7 +339,7 @@ function App() {
           return
         }
 
-        const starter = cloneGrades(starterGrades)
+        const starter = sanitizeSemesters(cloneGrades(starterGrades))
         await setDoc(fileRef, {
           fileName: CURRENT_GRADES_FILE,
           semesters: starter,
@@ -570,7 +481,7 @@ function App() {
   }
 
   const updateSemesterName = (semesterId, name) => {
-    setSemesters((current) => current.map((semester) => (semester.id === semesterId ? { ...semester, name } : semester)))
+    setSemesters((current) => sanitizeSemesters(current.map((semester) => (semester.id === semesterId ? { ...semester, name } : semester))))
     markUnsaved()
   }
 
@@ -593,7 +504,7 @@ function App() {
   }
 
   const addCourse = (semesterId) => {
-    setSemesters((current) => current.map((semester) => (
+    setSemesters((current) => sanitizeSemesters(current.map((semester) => (
       semester.id === semesterId
         ? {
             ...semester,
@@ -603,23 +514,24 @@ function App() {
             ],
           }
         : semester
-    )))
+    ))))
     markUnsaved()
   }
 
   const updateCourse = (semesterId, courseId, field, value) => {
-    setSemesters((current) => current.map((semester) => (
+    setSemesters((current) => sanitizeSemesters(current.map((semester) => (
       semester.id === semesterId
         ? {
             ...semester,
             courses: semester.courses.map((course) => (course.id === courseId ? { ...course, [field]: value } : course)),
           }
         : semester
-    )))
+    ))))
     markUnsaved()
   }
 
   const updateGradeScale = (schemeKey) => {
+    if (!isValidGradeScale(schemeKey)) return
     setSelectedSchemeKey(schemeKey)
     markUnsaved()
     announce(`${getScheme(schemeKey).name} applied`)
@@ -637,12 +549,22 @@ function App() {
   const importJson = (event) => {
     const file = event.target.files?.[0]
     if (!file) return
+    if (file.size > MAX_JSON_IMPORT_BYTES) {
+      announce('JSON file is too large')
+      event.target.value = ''
+      return
+    }
 
     const reader = new FileReader()
     reader.onload = () => {
       try {
         const parsed = JSON.parse(reader.result)
-        setSemesters(normalizeSemesters(parsed))
+        const nextSemesters = sanitizeSemesters(parsed)
+        if (!nextSemesters.length && Array.isArray(parsed) && parsed.length) {
+          announce('JSON file does not match the grade format')
+          return
+        }
+        setSemesters(nextSemesters)
         setExpandedSemesters(new Set())
         markUnsaved()
         announce(`${file.name} imported`)
@@ -670,21 +592,23 @@ function App() {
 
     setIsSaving(true)
     try {
+      const safeSemesters = sanitizeSemesters(semesters)
       await setDoc(
         doc(db, 'users', user.uid, 'files', CURRENT_GRADES_FILE),
         {
           fileName: CURRENT_GRADES_FILE,
-          semesters,
+          semesters: safeSemesters,
           gradeScale: selectedSchemeKey,
           updatedAt: serverTimestamp(),
         },
         { merge: true },
       )
       setLastSaved(new Date())
+      setSemesters(safeSemesters)
       setHasUnsavedChanges(false)
       setStatusMessage('Saved')
-    } catch (error) {
-      setStatusMessage(error.message)
+    } catch {
+      setStatusMessage('Save failed. Please retry.')
     } finally {
       setIsSaving(false)
     }

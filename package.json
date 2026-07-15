@@ -8,6 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "node --test tests/grades.test.mjs tests/firebase-hosting.test.mjs",
+    "test:rules": "firebase emulators:exec --only firestore \"node --test tests/firestore.rules.test.mjs\"",
+    "security:secrets": "node scripts/secret-scan.mjs",
+    "security:check": "npm audit --audit-level=low && npm run security:secrets && npm run lint && npm test && npm run test:rules && npm run build",
     "firebase:deploy": "npm run build && npx firebase-tools deploy"
   },
   "dependencies": {
@@ -21,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@firebase/rules-unit-testing": "^5.0.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",

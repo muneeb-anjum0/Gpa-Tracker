@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
+import { CURRENT_GRADES_FILE } from './grades'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -25,4 +26,4 @@ const app = firebaseReady ? initializeApp(firebaseConfig) : null
 
 export const auth = app ? getAuth(app) : null
 export const db = app ? getFirestore(app) : null
-export const CURRENT_GRADES_FILE = 'CURRENT-GRADES.json'
+export { CURRENT_GRADES_FILE }

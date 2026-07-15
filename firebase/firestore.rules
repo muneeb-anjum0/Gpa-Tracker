@@ -2,10 +2,39 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedInOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isKnownGradeScale(value) {
+      return value in ['zab', 'standard', 'fivePoint'];
+    }
+
+    function isCurrentGradesFile() {
+      return request.resource.data.keys().hasOnly(['fileName', 'semesters', 'gradeScale', 'createdAt', 'updatedAt'])
+        && request.resource.data.fileName == "CURRENT-GRADES.json"
+        && request.resource.data.gradeScale is string
+        && isKnownGradeScale(request.resource.data.gradeScale)
+        && request.resource.data.semesters is list
+        && request.resource.data.semesters.size() <= 24
+        && request.resource.data.updatedAt == request.time;
+    }
+
     match /users/{userId}/files/{fileId} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == userId
+      allow read: if isSignedInOwner(userId)
         && fileId == "CURRENT-GRADES.json";
+
+      allow create: if isSignedInOwner(userId)
+        && fileId == "CURRENT-GRADES.json"
+        && isCurrentGradesFile()
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if isSignedInOwner(userId)
+        && fileId == "CURRENT-GRADES.json"
+        && isCurrentGradesFile()
+        && request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if false;
     }
   }
 }
